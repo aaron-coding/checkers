@@ -1,28 +1,30 @@
 # encoding: utf-8
 
 class Piece
-  attr_reader :color, :pos
+  attr_reader :color
+  attr_accessor :pos
   def initialize(color, pos, board, king = false)
     @color = color
-    @directions = ((color == :red) ? [[1, -1], [1, 1]] : [[-1, -1], [-1, 1]])
+    @king = king
+    if @king
+      @directions = [[1, -1], [1, 1], [-1, -1], [-1, 1]]
+    else
+      @directions = ((color == :red) ? [[1, -1], [1, 1]] : [[-1, -1], [-1, 1]])
+    end
     @pos = pos
     @board = board
-    @king = king
   end
       
   def perform_slide(end_pos)
     ok_to_move = @directions.any? do |delta| 
       [(@pos[0] + delta[0]), (@pos[1] + delta[1])] == end_pos
     end
-    
     if ok_to_move
-      p "Yes, you can jump there!"
-      original_spot = @pos.dup
-      @board[end_pos] = self
-      # @board[end_pos] = color
-      @board.make_pos_nil(original_spot)
+      @board.move!(@pos, end_pos)
+      true
     else
       puts "invalid move"
+      false
     end
   end
   
@@ -31,43 +33,51 @@ class Piece
   end
   
   def perform_jump(end_pos)
-    enemy_spots = []
+    enemy_spots = find_jumpable_enemies
+    pos_jumps = find_jump_destinations(enemy_spots)
     
-    ###
-    @directions.each  do |delta| 
+    if pos_jumps.include?(end_pos)
+      @board[(find_jumped_piece(@pos, end_pos))] = nil
+      @board.move!(@pos, end_pos)
+      true
+    else
+      p "Sorry you can't jump there"
+      false
+    end
+  end
+  
+  def inspect
+    return (@color == :red) ? "⛄" : "☸" unless @king
+    (@color == :red) ? "♔" : "♚"
+  end
+  
+  private
+  
+  def find_jumpable_enemies
+    enemy_spots = []
+    @directions.each do |delta|
       pos_plus_one = [(@pos[0] + delta[0]), (@pos[1] + delta[1])]
-      unless @board[pos_plus_one].nil? || !(on_board?(pos_plus_one)) ##only jump over pieces
+      unless @board[pos_plus_one].nil? || !(on_board?(pos_plus_one)) ##only jump over pieces, exclude negative values
         if @board[pos_plus_one].color != color #only jump over enemy pieces
           enemy_spots += [pos_plus_one]
         end
       end
     end
-    ###
+    enemy_spots
+  end
+
+  def find_jump_destinations(enemy_spots)
     pos_jumps = []
     enemy_spots.each do |enemy_spot|
       move_diff = [enemy_spot[0] - @pos[0], enemy_spot[1] - @pos[1]]
       pos_jumps << [enemy_spot[0] + move_diff[0], enemy_spot[1] + move_diff[1]]      
     end
-    pos_jumps.reject! {|pos_spot| @board[pos_spot] != nil}
-    if pos_jumps.include?(end_pos)
-      one_jump_diff = [((end_pos[0] - @pos[0]) / 2), ((end_pos[1] - @pos[1]) / 2)]
-      del_piece = [(@pos[0] + one_jump_diff[0]), (@pos[1] + one_jump_diff[1])]
-      original_spot = @pos.dup
-      @board.make_pos_nil(del_piece)
-      p "Yes, you can jump there!"
-      p "you jumped the piece at #{del_piece}"
-      @board[end_pos] = color
-      @board.make_pos_nil(original_spot)
-      return true
-    else
-      p "Sorry you can't jump there"
-      return false
-    end
+    pos_jumps.select {|pos_spot| @board[pos_spot] == nil}
   end
   
-
-  def inspect
-    (@color == :red) ? "⛄" : "☸"
+  def find_jumped_piece(start_pos, end_pos)
+    one_jump_diff = [((end_pos[0] - @pos[0]) / 2), ((end_pos[1] - @pos[1]) / 2)]
+    [(@pos[0] + one_jump_diff[0]), (@pos[1] + one_jump_diff[1])]
   end
   
 end
@@ -86,8 +96,10 @@ class Board
     (color == :red) ? :black : :red
   end
 
-  def move
-    
+  def move!(start_pos, end_pos)
+     self[end_pos] = self[start_pos]
+     self[start_pos] = nil
+     self[end_pos].pos = end_pos 
   end
 
   def [](pos)
@@ -105,20 +117,21 @@ class Board
     # end
   end
 
-  def make_pos_nil(pos) 
-    @grid[pos[0]][pos[1]] = nil
-  end
+  # def make_pos_nil(pos)
+  #   @grid[pos[0]][pos[1]] = nil
+  # end
+  
   def populate(color)
     #    rows = ((color == :red) ? (0..2) : )
-    (0..1).each do |row|
+    (0..2).each do |row|
       (0..7).each do |col|
-        if row % 2 == 0
-          if col % 2 == 0
+        if row.even?
+          if col.even?
             @grid[row][col] = Piece.new(color, [row,col], self)
           end
         else
-          if col % 2 != 0
-            @grid[row][col] = Piece.new(other_color(color), [row,col], self)
+          if col.odd?
+            @grid[row][col] = Piece.new(color, [row,col], self)
           end
         end
       end
@@ -127,12 +140,12 @@ class Board
   
     (5..7).each do |row|
       (0..7).each do |col|
-        if row % 2 == 0
-          if col % 2 == 0
+        if row.even?
+          if col.even?
             @grid[row][col] = Piece.new(other_color(color), [row,col], self)
           end
         else
-          if col % 2 != 0
+          if col.odd?
             @grid[row][col] = Piece.new(other_color(color), [row,col], self)
           end
         end
