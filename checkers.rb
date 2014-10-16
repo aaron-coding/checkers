@@ -4,7 +4,7 @@ end
   
 class Piece
   attr_reader :color
-  attr_accessor :pos
+  attr_accessor :pos, :king
   def initialize(color, pos, board, king = false)
     @color = color
     @king = king
@@ -125,8 +125,8 @@ class Board
   def initialize(fill = true)
     @grid = Array.new(8) { Array.new(8) }
     if fill
-    populate(:red)
-    #testing_populate(:red)
+    #populate(:red)
+    testing_populate(:red)
     end
   end
 
@@ -138,6 +138,16 @@ class Board
      self[end_pos] = self[start_pos]
      self[start_pos] = nil
      self[end_pos].pos = end_pos 
+     promote_if_deserved(end_pos)
+  end
+  
+  def promote_if_deserved(pos)
+    piece = @grid[pos[0]][pos[1]]
+    if piece.color == :red && pos[0] == 7
+      piece.king = true
+    elsif piece.color == :black && pos[0] == 0
+      piece.king = true
+    end
   end
 
   def [](pos)
