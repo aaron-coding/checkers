@@ -54,7 +54,7 @@ class Piece
     if valid_move_seq?(move_sequence)
       perform_moves!(move_sequence)
     else
-      raise InvalidMoveError
+      raise InvalidMoveError.new("Cannot perform that set of moves")
     end
   end
   
@@ -63,11 +63,11 @@ class Piece
       dest = move_sequence.flatten
       return true if perform_slide(dest)
       return true if perform_jump(dest)
-      raise InvalidMoveError 
+      raise InvalidMoveError.new("Cannot slide onto that piece") 
     elsif move_sequence.count > 1
       move_sequence.each do |end_dest|
         if perform_jump(end_dest) == false
-          raise InvalidMoveError      
+          raise InvalidMoveError.new("Cannot make that series of jumps")       
         end
       end 
     end
@@ -85,7 +85,9 @@ class Piece
   end 
   
   def inspect
-    return (@color == :red) ? "⛄" : "☸" unless @king
+#    return (@color == :red) ? "R" : "B" unless @king
+    #return (@color == :red) ? "⛄" : "☸" unless @king
+    return (@color == :red) ? "☻" : "☻" unless @king
     (@color == :red) ? "♔" : "♚"
   end
   

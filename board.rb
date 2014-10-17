@@ -1,4 +1,5 @@
 require_relative "piece"
+require 'colorize'
 
 class Board
   attr_reader :grid
@@ -52,6 +53,45 @@ class Board
 
   def num_pieces(color)
     @grid.flatten.compact.count{ |piece| piece.color == color }
+  end
+  
+  def render
+    print "   0  1  2  3  4  5  6  7"
+    (0..7).each do |row|
+      puts ""
+      print "#{row} "
+      (0..7).each do |col|
+        if row.even?
+          if col.even? 
+            if @grid[row][col].nil?
+              print "   ".on_light_black
+            else
+              if @grid[row][col].color == :red
+              print " #{@grid[row][col].inspect} ".red.on_light_black
+              else
+              print " #{@grid[row][col].inspect} ".on_light_black
+              end
+            end
+          else
+            print "   ".on_light_red
+          end
+        else
+          if col.odd? 
+            if @grid[row][col].nil?
+              print "   ".on_light_black
+            else
+              if @grid[row][col].color == :red
+              print " #{@grid[row][col].inspect} ".red.on_light_black
+              else
+              print " #{@grid[row][col].inspect} ".on_light_black
+              end
+            end
+          else
+            print "   ".on_light_red
+          end
+        end
+      end
+    end
   end
   
   def populate(color)
