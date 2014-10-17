@@ -1,7 +1,7 @@
 # encoding: utf-8
 require_relative "board"
 class Piece
-  attr_reader :color
+  attr_reader :color, :king
   attr_accessor :pos
   
   def initialize(color, pos, board, king = false)

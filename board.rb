@@ -36,7 +36,7 @@ class Board
     (0..7).each do |row|
       (0..7).each do |col|
         if @grid[row][col]
-          board_copy[[row,col]] = Piece.new(@grid[row][col].color, [row,col], board_copy)
+          board_copy[[row,col]] = Piece.new(@grid[row][col].color, [row,col], board_copy, @grid[row][col].king)
         end
       end
     end
