@@ -8,7 +8,6 @@ class Board
     @grid = Array.new(8) { Array.new(8) }
     if fill
       populate(:red)
-      #testing_populate(:red)
     end
   end
 
@@ -95,7 +94,6 @@ class Board
   end
   
   def populate(color)
-    #    rows = ((color == :red) ? (0..2) : )
     (0..2).each do |row|
       (0..7).each do |col|
         if row.even?
@@ -112,53 +110,6 @@ class Board
 
   
     (5..7).each do |row|
-      (0..7).each do |col|
-        if row.even?
-          if col.even?
-            @grid[row][col] = Piece.new(other_color(color), [row,col], self)
-          end
-        else
-          if col.odd?
-            @grid[row][col] = Piece.new(other_color(color), [row,col], self)
-          end
-        end
-      end
-    end
-  end
-  
-  
-  
-  def testing_populate(color)
-    (0..0).each do |row|
-      (0..7).each do |col|
-        if row.even?
-          if col.even?
-            @grid[row][col] = Piece.new(color, [row,col], self)
-          end
-        else
-          if col.odd?
-            @grid[row][col] = Piece.new(color, [row,col], self)
-          end
-        end
-      end
-    end
-    
-    (1..1).each do |row|
-      (0..7).each do |col|
-        if row.even?
-          if col.even?
-            @grid[row][col] = Piece.new(other_color(color), [row,col], self)
-          end
-        else
-          if col.odd?
-            @grid[row][col] = Piece.new(other_color(color), [row,col], self)
-          end
-        end
-      end
-    end
-
-  
-    (3..3).each do |row|
       (0..7).each do |col|
         if row.even?
           if col.even?
